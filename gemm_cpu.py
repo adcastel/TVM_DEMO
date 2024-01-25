@@ -61,7 +61,8 @@ def evaluate_func(mod,m,n,k,dtype,dev):
 def gemm_v1(m,n,k, dtype, target, dev):
 
     A,B,C =define_computation(m,n,k)
-# Schedule the computation
+    
+    # Schedule the computation
     s = te.create_schedule(C.op)
     print_IR(s,A,B,C,"gemm_cpu_v1")
     mod = build_function(s,A,B,C,"gemm_cpu_v1",target)
@@ -70,8 +71,10 @@ def gemm_v1(m,n,k, dtype, target, dev):
 def gemm_v2(m,n,k, dtype, target, dev):
 
     A,B,C =define_computation(m,n,k)
-# Schedule the computation
+    
+    # Schedule the computation
     s = te.create_schedule(C.op)
+    
     # Blocking by loop tiling
     bn = 32
     kfactor=4
@@ -90,8 +93,10 @@ def gemm_v2(m,n,k, dtype, target, dev):
 def gemm_v3(m,n,k, dtype, target, dev):
 
     A,B,C =define_computation(m,n,k)
-# Schedule the computation
+
+    # Schedule the computation
     s = te.create_schedule(C.op)
+    
     # Blocking by loop tiling
     bn = 32
     kfactor=4
@@ -112,8 +117,10 @@ def gemm_v3(m,n,k, dtype, target, dev):
 def gemm_v4(m,n,k, dtype, target, dev):
 
     A,B,C, packedB = define_computation2(m,n,k)
-# Schedule the computation
+
+    # Schedule the computation
     s = te.create_schedule(C.op)
+    
     # Blocking by loop tiling
     bn = 32
     kfactor=4
@@ -136,9 +143,6 @@ def gemm_v4(m,n,k, dtype, target, dev):
     mod = evaluate_func(mod,m,n,k,dtype,dev)
 
 
-
-
-
 dtype = "float32"
 
 """
@@ -155,7 +159,7 @@ A few examples for specific targets :
 target = "llvm"
 target = "llvm -device=arm_cpu -mattr=+v8.2a,+fp-armv8,+neon"
 dev = tvm.device(target, 0)
-m = n = k = 2048
+m = n = k = 1024
 print("######### V1 ############")
 gemm_v1(m,n,k,dtype,target,dev)
 print("PRESS ANY KEY")

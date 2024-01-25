@@ -5,8 +5,6 @@ import numpy
 
 
 # Define the shape of the tensor
-n = 1000#te.var("n")
-
 def define_computation(n):
     A = te.placeholder((n,), name="A")
     B = te.placeholder((n,), name="B")
@@ -80,6 +78,4 @@ print("######### V2 ############")
 vector_add_v2(n,dtype,target,dev)
 print("######### V3 ############")
 vector_add_v3(n,dtype,target,dev)
-# Create input data (e.g., an array of 5 elements)
-# Print the result
 

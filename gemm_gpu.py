@@ -57,17 +57,7 @@ def gemm_gpu_v1(M,N,K,target):
     s[C].bind(tx, te.thread_axis("threadIdx.x"))
     s[C].bind(by, te.thread_axis("blockIdx.y"))
     s[C].bind(ty, te.thread_axis("threadIdx.y"))
-    #AA = s.cache_read(A, "local", [C])
-    """ 
-    BB = s.cache_read(B, "shared", [C])
-    AL = s.cache_read(AA, "local", [C])
-    BL = s.cache_read(BB, "local", [C])
-    CL = s.cache_write(C, "local")
-    """
     
-    #s[C].reorder(bx,by,k,tx,ty)
-
-    #target = tvm.target.Target(target="cuda", host="llvm")
 
     func = tvm.build(s, [A, B, C], target=target, name="mmul_gpu")
     assert func
@@ -75,7 +65,6 @@ def gemm_gpu_v1(M,N,K,target):
     print(tvm.lower(s, [A, B, C], simple_mode=True))
     return func
 
-# TVM Matrix Multiplication using TE
 
 def gemm_gpu_v2(M,N,K,B,target):
 
@@ -94,18 +83,7 @@ def gemm_gpu_v2(M,N,K,B,target):
     s[C].bind(tx, te.thread_axis("threadIdx.y"))
     s[C].bind(by, te.thread_axis("blockIdx.x"))
     s[C].bind(ty, te.thread_axis("threadIdx.x"))
-    #AA = s.cache_read(A, "local", [C])
-    """ 
-    BB = s.cache_read(B, "shared", [C])
-    AL = s.cache_read(AA, "local", [C])
-    BL = s.cache_read(BB, "local", [C])
-    CL = s.cache_write(C, "local")
-    """
     
-    #s[C].reorder(bx,by,k,tx,ty)
-
-    #target = tvm.target.Target(target="cuda", host="llvm")
-
     func = tvm.build(s, [A, B, C], target=target, name="mmul_gpu")
     assert func
     print("\n------------CODIGO GENERADO------------\n")
@@ -119,9 +97,7 @@ def gemm_gpu_v3(M,N,K,target):
     A = te.placeholder((M, K), name="A")
     B = te.placeholder((K, N), name="B")
     ths=32
-    #AC = te.compute((M/32,K/32, 32,32), lambda a,b,c,d: A[a*32+c,b*32+d], name="AC")
 
-    #C = te.compute((M, N), lambda x, y: te.sum(AC[x//32, k//32,tvm.tir.indexmod(x,32),tvm.tir.indexmod(k,32)] * B[k, y], axis=k), name="C")
     C = te.compute((M, N), lambda x, y: te.sum(A[x, k] * B[k, y], axis=k), name="C")
 	
 	
@@ -146,16 +122,9 @@ def gemm_gpu_v3(M,N,K,target):
 
     AA = s.cache_read(A, "shared", [C])
     s[AA].compute_at(s[C],tx)
-    """ 
-    BB = s.cache_read(B, "shared", [C])
-    AL = s.cache_read(AA, "local", [C])
-    BL = s.cache_read(BB, "local", [C])
-    CL = s.cache_write(C, "local")
-    """
     
     s[C].reorder(bx,by,k,tx,ty)
 
-    #target = tvm.target.Target(target="cuda", host="llvm")
 
     func = tvm.build(s, [A, B, C], target=target, name="mmul_gpu")
     assert func
